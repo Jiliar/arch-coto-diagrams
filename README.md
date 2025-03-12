@@ -1,5 +1,3 @@
-Aquí tienes un README.md para el repositorio de diagramas UML de la aplicación COTO. 🚀
-
 📌 COTO - UML Diagrams Repository
 
 ¡Bienvenido al repositorio de diagramas UML de la aplicación COTO! 🏗️📊 Aquí encontrarás la documentación visual de la arquitectura del sistema en diferentes niveles de abstracción.

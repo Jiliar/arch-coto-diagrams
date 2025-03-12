@@ -25,12 +25,13 @@ Aquí tienes un README.md para el repositorio de diagramas UML de la aplicación
 	•	Representación de los procesos y lógica de negocio en forma de flujo de actividades.
 
 🛠️ Uso
-	1.	Clona este repositorio:
 
+1.	Clona este repositorio:
+```bash
 git clone https://github.com/tu-usuario/coto-uml.git
+```
 
-
-	2.	Navega entre las carpetas para explorar los diagramas.
+2.	Navega entre las carpetas para explorar los diagramas.
 
 🎨 Herramientas utilizadas
 	•	PlantUML 🖍️

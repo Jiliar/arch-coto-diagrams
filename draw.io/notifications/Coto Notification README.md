@@ -1,12 +1,12 @@
-Plan de Implementación de Arquitectura Serverless para Gestión y Envío de Notificaciones
+## **Plan de Implementación de Arquitectura Serverless para Gestión y Envío de Notificaciones**
 
-1️⃣ Introducción
+### **1️⃣ Introducción**
 
 Este documento describe la estrategia para la implementación de una arquitectura serverless en AWS para gestionar el envío de notificaciones vía Email, SMS y Push Notifications, así como la validación de OTPs. La solución se diseñará para ser escalable, altamente disponible y segura, con la posibilidad de adaptarse a altos volúmenes de tráfico y requerimientos futuros.
 
-2️⃣ Arquitectura de la Solución
+### **2️⃣ Arquitectura de la Solución**
 
-🛠️ Componentes AWS
+#### **🛠️ Componentes AWS**
 
 Componente	Descripción
 API Gateway	Expone 4 endpoints para interactuar con los diferentes tipos de notificaciones y la validación de OTPs.
@@ -17,28 +17,32 @@ RDS	Almacenamiento de OTPs y control del flujo de envíos.
 S3	Almacenamiento de templates HTML de emails.
 CloudWatch	Monitoreo y logging de eventos y notificaciones enviadas.
 
-📌 Diagrama General de la Arquitectura
+#### **📌 Diagrama General de la Arquitectura**
 
 (Clientes) → API Gateway → Lambda Processor → SQS → SNS → Lambda Envío → Destinatarios
 (Clientes) → API Gateway → Lambda OTP → RDS (Almacenamiento y validación de OTPs)
 
-3️⃣ Consideraciones Clave
+### **3️⃣ Consideraciones Clave**
 
-🟢 Escalabilidad y Disponibilidad
+###### **🟢 Escalabilidad y Disponibilidad**
+
+
 	•	Serverless: Uso de AWS Lambda garantiza escalado automático basado en demanda.
 	•	SQS y SNS: Facilitan la distribución asíncrona y desacoplamiento de los procesos.
 	•	Multi-región: Implementación futura en múltiples regiones para mayor resiliencia.
 
-🔒 Seguridad y Control
+###### **🔒 Seguridad y Control**
+
+
 	•	Autenticación y Autorización: Uso de JWT con API Gateway para restringir accesos. (Solo si es necesario)
 	•	Encriptación: Datos en tránsito mediante HTTPS y datos en reposo con KMS.
 	•	Control de Fraude: Registro en RDS de intentos de envío masivo de OTPs y validaciones de comportamiento sospechoso.
 
-4️⃣ Plan de Implementación
+### **4️⃣ Plan de Implementación**
 
 Se implementará de forma gradual, priorizando los envíos de Email Notifications y la generación de OTPs, seguido de SMS y Push Notifications según el roadmap.
 
-🚀 Fase 1: Implementación del Flujo de Email y OTPs (Alta Prioridad)
+**🚀 Fase 1: Implementación del Flujo de Email y OTPs (Alta Prioridad)**
 	1.	Definición de API Gateway con los endpoints para:
 	•	Envío de emails a múltiples destinatarios.
 	•	Generación y validación de OTPs.
@@ -49,16 +53,16 @@ Se implementará de forma gradual, priorizando los envíos de Email Notification
 	6.	Configuración de RDS para almacenamiento de OTPs.
 	7.	CloudWatch para monitoreo y métricas.
 
-📩 Fase 2: Implementación de SMS Notifications (Baja Prioridad)
+**📩 Fase 2: Implementación de SMS Notifications (Media Prioridad)**
 	1.	Creación de SQS y SNS específicos para SMS.
 	2.	Desarrollo de Lambda para envío de SMS.
 	3.	Ajustes de escalabilidad y monitoreo en CloudWatch.
 
-📲 Fase 3: Implementación de Push Notifications (Baja Prioridad)
+**📲 Fase 3: Implementación de Push Notifications (Baja Prioridad)**
 	1.	Creación de SQS y SNS específicos para Push Notifications.
 	2.	Desarrollo de Lambda para envío de notificaciones Push.
 	3.	Pruebas de carga y escalabilidad.
 
-5️⃣ Conclusión
+**5️⃣ Conclusión**
 
 Este plan garantiza una implementación progresiva, comenzando por los servicios más críticos (Email y OTPs) y permitiendo una expansión segura y escalable hacia SMS y Push Notifications. 🚀

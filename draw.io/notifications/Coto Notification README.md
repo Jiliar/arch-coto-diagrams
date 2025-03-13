@@ -8,14 +8,14 @@ Este documento describe la estrategia para la implementación de una arquitectur
 
 #### **🛠️ Componentes AWS**
 
-Componente	Descripción
-API Gateway	Expone 4 endpoints para interactuar con los diferentes tipos de notificaciones y la validación de OTPs.
-AWS Lambda	Manejador de eventos para procesar las notificaciones y el registro de auditoría.
-SQS	Manejo de colas para desacoplar los procesos de envío de notificaciones y auditoría.
-SNS	Canal de distribución de notificaciones basado en tópicos.
-RDS	Almacenamiento de OTPs y control del flujo de envíos.
-S3	Almacenamiento de templates HTML de emails.
-CloudWatch	Monitoreo y logging de eventos y notificaciones enviadas.
+**Componente	Descripción**
+*API Gateway*	     Expone 4 endpoints para interactuar con los diferentes tipos de notificaciones y la validación de OTPs.
+*AWS Lambda*	     Manejador de eventos para procesar las notificaciones y el registro de auditoría.
+*SQS	*                     Manejo de colas para desacoplar los procesos de envío de notificaciones y auditoría.
+*SNS*	                     Canal de distribución de notificaciones basado en tópicos.
+*RDS	*                    Almacenamiento de OTPs y control del flujo de envíos.
+*S3*	                     Almacenamiento de templates HTML de emails.
+*CloudWatch*	     Monitoreo y logging de eventos y notificaciones enviadas.
 
 #### **📌 Diagrama General de la Arquitectura**
 
@@ -26,15 +26,13 @@ CloudWatch	Monitoreo y logging de eventos y notificaciones enviadas.
 
 ###### **🟢 Escalabilidad y Disponibilidad**
 
-
-	•	Serverless: Uso de AWS Lambda garantiza escalado automático basado en demanda.
+    •	Serverless: Uso de AWS Lambda garantiza escalado automático basado en demanda.
 	•	SQS y SNS: Facilitan la distribución asíncrona y desacoplamiento de los procesos.
 	•	Multi-región: Implementación futura en múltiples regiones para mayor resiliencia.
 
 ###### **🔒 Seguridad y Control**
 
-
-	•	Autenticación y Autorización: Uso de JWT con API Gateway para restringir accesos. (Solo si es necesario)
+    •	Autenticación y Autorización: Uso de JWT con API Gateway para restringir accesos. (Solo si es necesario)
 	•	Encriptación: Datos en tránsito mediante HTTPS y datos en reposo con KMS.
 	•	Control de Fraude: Registro en RDS de intentos de envío masivo de OTPs y validaciones de comportamiento sospechoso.
 
@@ -42,7 +40,9 @@ CloudWatch	Monitoreo y logging de eventos y notificaciones enviadas.
 
 Se implementará de forma gradual, priorizando los envíos de Email Notifications y la generación de OTPs, seguido de SMS y Push Notifications según el roadmap.
 
-**🚀 Fase 1: Implementación del Flujo de Email y OTPs (Alta Prioridad)**
+###### **🚀 Fase 1: Implementación del Flujo de Email y OTPs (Alta Prioridad)**
+
+
 	1.	Definición de API Gateway con los endpoints para:
 	•	Envío de emails a múltiples destinatarios.
 	•	Generación y validación de OTPs.
@@ -53,16 +53,20 @@ Se implementará de forma gradual, priorizando los envíos de Email Notification
 	6.	Configuración de RDS para almacenamiento de OTPs.
 	7.	CloudWatch para monitoreo y métricas.
 
-**📩 Fase 2: Implementación de SMS Notifications (Media Prioridad)**
+###### **📩 Fase 2: Implementación de SMS Notifications (Media Prioridad)**
+
+
 	1.	Creación de SQS y SNS específicos para SMS.
 	2.	Desarrollo de Lambda para envío de SMS.
 	3.	Ajustes de escalabilidad y monitoreo en CloudWatch.
 
-**📲 Fase 3: Implementación de Push Notifications (Baja Prioridad)**
+###### **📲 Fase 3: Implementación de Push Notifications (Baja Prioridad)**
+
+
 	1.	Creación de SQS y SNS específicos para Push Notifications.
 	2.	Desarrollo de Lambda para envío de notificaciones Push.
 	3.	Pruebas de carga y escalabilidad.
 
-**5️⃣ Conclusión**
+### **5️⃣ Conclusión**
 
 Este plan garantiza una implementación progresiva, comenzando por los servicios más críticos (Email y OTPs) y permitiendo una expansión segura y escalable hacia SMS y Push Notifications. 🚀

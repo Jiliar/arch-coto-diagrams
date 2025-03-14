@@ -10,11 +10,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 # Configuración de AWS
-sqs = boto3.client('sqs')
 sns = boto3.client('sns')
+sqs = boto3.client('sqs')
 
 # Variables de entorno
-SQS_QUEUE_URL = os.environ['SQS_QUEUE_URL']  
 SNS_TARGET_TOPIC_ARN = os.environ['SNS_TARGET_TOPIC_ARN']
 SQS_AUDIT_QUEUE_URL = os.environ['SQS_COTO_AUDIT_QUEUE']
 
@@ -22,7 +21,7 @@ def send_audit_event(transaction_id, path, request_body, transaction_output, req
     """Envía un mensaje de auditoría a SQS."""
     audit_message = {
         "transaction_id": transaction_id,
-        "type": "sms-notification",
+        "type": "push-notification",
         "timestamp": datetime.utcnow().strftime("%Y-%m-%d-%H.%M.%S.%f"),
         "path": path,
         "request_body": request_body,
@@ -32,39 +31,30 @@ def send_audit_event(transaction_id, path, request_body, transaction_output, req
     sqs.send_message(QueueUrl=SQS_AUDIT_QUEUE_URL, MessageBody=json.dumps(audit_message))
     logger.info(f"Evento de auditoría enviado: {audit_message}")
 
-def process_sqs_messages(path:str, transaction_id:str, request_id:str):
-    """Lee los mensajes de la cola SQS y los publica en el topic SNS de destino."""
+def process_sns_event(event, request_id):
+    """Procesa los mensajes recibidos desde SNS y los publica en otro SNS Topic."""
+    transaction_id = str(uuid.uuid4())
+    path = "/users/push"
 
     try:
-        logger.info(f"Esperando mensajes en la cola SQS: {SQS_QUEUE_URL}")
-        messages = sqs.receive_message(
-            QueueUrl=SQS_QUEUE_URL,
-            MaxNumberOfMessages=10,
-            WaitTimeSeconds=5
-        )
-
-        if "Messages" not in messages:
-            logger.info("No hay mensajes en la cola SQS")
-            transaction_output = {"message": "No hay mensajes en la cola"}
-            send_audit_event(transaction_id, path, {}, transaction_output, request_id)
-            return {"statusCode": 200, "body": transaction_output}
+        # Extraer los registros del evento SNS
+        records = event.get("Records", [])
+        if not records:
+            logger.warning("Evento SNS sin registros")
+            return {"statusCode": 400, "body": "No hay registros en el evento SNS"}
 
         processed_messages = []
 
-        for message in messages["Messages"]:
-            receipt_handle = message["ReceiptHandle"]
-            sqs_message = json.loads(message["Body"])  
-
-            transaction_id = sqs_message.get("transaction_id", transaction_id)
-            title = sqs_message.get("title", "Notificación")
-            message_body = sqs_message.get("body", "Sin contenido")
-            priority = sqs_message.get("priority", "normal")
-            data = sqs_message.get("data", {})
-            recipients = sqs_message.get("recipients", [])
+        for record in records:
+            sns_message = json.loads(record["Sns"]["Message"])  # Extraer el mensaje de SNS
+            title = sns_message.get("title", "Notificación")
+            message_body = sns_message.get("body", "Sin contenido")
+            priority = sns_message.get("priority", "normal")
+            data = sns_message.get("data", {})
+            recipients = sns_message.get("recipients", [])
 
             if not recipients:
-                logger.warning(f"Mensaje sin destinatarios. Se descartará: {sqs_message}")
-                sqs.delete_message(QueueUrl=SQS_QUEUE_URL, ReceiptHandle=receipt_handle)
+                logger.warning(f"Mensaje sin destinatarios. Se descartará: {sns_message}")
                 continue
 
             # Construir el mensaje procesado
@@ -76,38 +66,31 @@ def process_sqs_messages(path:str, transaction_id:str, request_id:str):
                 "recipients": recipients
             }
 
-            logger.info(f"Publicando notificación Push en SNS. Destinatarios: {len(recipients)}")
+            logger.info(f"Publicando notificación Push en SNS destino. Destinatarios: {len(recipients)}")
 
-            # Publicar el mensaje en SNS para su entrega final
+            # Publicar en otro SNS Topic para su entrega final
             sns.publish(
                 TopicArn=SNS_TARGET_TOPIC_ARN,
                 Message=json.dumps(processed_message),
                 Subject="Push Notification Processed"
             )
 
-            # Eliminar el mensaje de la cola SQS tras procesarlo correctamente
-            sqs.delete_message(QueueUrl=SQS_QUEUE_URL, ReceiptHandle=receipt_handle)
-            logger.info("Mensaje procesado y eliminado de la cola SQS")
-
-            processed_messages.append({"push_processed_message" : processed_message, "transaction_id": transaction_id})
+            processed_messages.append({"push_processed_message": processed_message, "transaction_id": transaction_id})
 
         transaction_output = {"processed_messages": processed_messages}
-        send_audit_event(transaction_id, path, messages, transaction_output, request_id)
+        send_audit_event(transaction_id, path, event, transaction_output, request_id)
 
         return {"statusCode": 200, "body": "Mensajes de Push procesados y enviados a SNS"}
 
     except Exception as e:
-        logger.error(f"Error en process_sqs_messages: {str(e)}", exc_info=True)
+        logger.error(f"Error en process_sns_event: {str(e)}", exc_info=True)
         transaction_output = {"error": str(e)}
-        send_audit_event(transaction_id, path, {}, transaction_output, request_id)
+        send_audit_event(transaction_id, path, event, transaction_output, request_id)
         return {"statusCode": 500, "body": transaction_output}
 
 def lambda_handler(event, context):
-    """Lambda que procesa los mensajes de SQS y los publica en SNS para entrega final."""
+    """Lambda que procesa eventos SNS y los publica en otro SNS Topic."""
     request_id = context.aws_request_id if context else "N/A"
-    transaction_id = str(uuid.uuid4())
+    logger.info(f"Lambda ejecutada. Request ID: {request_id}")
 
-    logger.info(f"Lambda ejecutada. Request ID: {request_id}, Transaction ID: {transaction_id}")
-
-    path = "/users/push"
-    return process_sqs_messages(path, transaction_id, request_id)
+    return process_sns_event(event, request_id)

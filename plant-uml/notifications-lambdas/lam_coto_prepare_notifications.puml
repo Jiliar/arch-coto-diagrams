@@ -4,8 +4,11 @@ autonumber
 participant "API Gateway" as API
 participant "Lambda Function" as Lambda
 participant "Aurora Database" as Aurora
+participant "SNS Queue (TopicEmailNotification)" as SNS_Email
 participant "SQS Queue (Email)" as SQS_Email
+participant "SNS Queue (TopicSMSNotification)" as SNS_SMS
 participant "SQS Queue (SMS)" as SQS_SMS
+participant "SNS Queue (TopicPushlNotification)" as SNS_Push
 participant "SQS Queue (Push)" as SQS_Push
 participant "SQS Audit Queue" as SQS_Audit
 
@@ -34,11 +37,14 @@ else
     alt Si hay destinatarios válidos
         Lambda -> Lambda: Construye mensaje de notificación
         alt Email
-            Lambda -> SQS_Email: Envía mensaje a la cola de email
+            Lambda -> SNS_Email: Publicar Mensaje
+            SNS_Email -> SQS_Email: Envía mensaje a la cola de email
         else SMS
-            Lambda -> SQS_SMS: Envía mensaje a la cola de SMS
+            Lambda -> SNS_SMS: Publicar Mensaje
+            SNS_SMS -> SQS_SMS: Envía mensaje a la cola de SMS
         else Push
-            Lambda -> SQS_Push: Envía mensaje a la cola de push notifications
+            Lambda -> SNS_Push: Publicar Mensaje
+            SNS_Push -> SQS_Push: Envía mensaje a la cola de push notifications
         end
     else
         Lambda -> Lambda: No hay destinatarios válidos

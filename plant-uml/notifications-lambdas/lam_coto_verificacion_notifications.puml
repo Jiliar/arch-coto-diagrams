@@ -1,0 +1,36 @@
+@startuml
+autonumber
+
+participant "API Gateway" as API
+participant "Lambda Function" as Lambda
+participant "Aurora Database" as Aurora
+participant "SQS Audit Queue" as SQS_Audit
+
+API -> Lambda: POST /otp/verify (headers, body)
+Lambda -> Lambda: Genera request_id y obtiene path
+
+alt Falta X-UserId o X-UserName
+    Lambda -> API: Retorna 400 (MISSING_HEADERS)
+else Falta OTP o transaction_type
+    Lambda -> API: Retorna 400 (MISSING_FIELDS)
+else
+    Lambda -> Aurora: Consulta OTP en la base de datos
+    Aurora -> Lambda: Retorna resultado de consulta
+
+    alt OTP válido
+        Lambda -> Aurora: Marca OTP como usado
+        Aurora -> Lambda: Confirmación de actualización
+        Lambda -> SQS_Audit: Guarda evento de éxito en auditoría
+        Lambda -> API: Retorna 204 (No Content)
+    else OTP inválido o expirado
+        Lambda -> SQS_Audit: Guarda error en auditoría
+        Lambda -> API: Retorna 404 (OTP_NOT_FOUND)
+    end
+end
+
+alt Error inesperado
+    Lambda -> SQS_Audit: Guarda error interno en auditoría
+    Lambda -> API: Retorna 500 (INTERNAL_ERROR)
+end
+
+@enduml

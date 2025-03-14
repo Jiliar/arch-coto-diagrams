@@ -1,0 +1,28 @@
+@startuml
+autonumber
+
+participant "SQS Queue (PushNotificationsTopic)" as SQS
+participant "Lambda Function" as Lambda
+participant "SNS Topic (Entrega de Push Notifications)" as PushSNS
+participant "SQS Audit Queue" as AuditQueue
+
+SQS -> Lambda: Dispara ejecución con mensaje de push notification
+Lambda -> SQS: Obtiene mensajes pendientes
+
+alt Si no hay mensajes en la cola
+    Lambda -> AuditQueue: Guarda evento "No hay mensajes"
+    AuditQueue -> Lambda: Confirmación de auditoría
+else
+    loop Para cada mensaje en SQS
+        Lambda -> Lambda: Extrae datos de la notificación push
+        Lambda -> PushSNS: Publica push notification formateada
+        PushSNS -> Lambda: Confirmación de publicación
+        
+        Lambda -> SQS: Elimina mensaje procesado de la cola
+        SQS -> Lambda: Confirmación de eliminación
+        
+        Lambda -> AuditQueue: Guarda evento de auditoría
+        AuditQueue -> Lambda: Confirmación de auditoría
+    end
+end
+@enduml

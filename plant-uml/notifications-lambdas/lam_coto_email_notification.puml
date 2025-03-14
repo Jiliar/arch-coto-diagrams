@@ -1,0 +1,37 @@
+@startuml
+autonumber
+
+participant "SQS Queue (EmailNotificationsTopic)" as SQS
+participant "Lambda Function" as Lambda
+participant "S3 Bucket (Plantillas)" as S3
+participant "SNS Topic (Entrega de Correos)" as EmailSNS
+participant "SQS Audit Queue" as AuditQueue
+
+SQS -> Lambda: Dispara ejecución con mensaje de email
+Lambda -> SQS: Obtiene mensajes pendientes
+
+alt Si no hay mensajes en la cola
+    Lambda -> AuditQueue: Guarda evento "No hay mensajes"
+    AuditQueue -> Lambda: Confirmación de auditoría
+else
+    Lambda -> S3: Descarga plantilla HTML
+    S3 -> Lambda: Retorna plantilla
+
+    alt Si hay error descargando plantilla
+        Lambda -> AuditQueue: Guarda error en auditoría
+        AuditQueue -> Lambda: Confirmación de auditoría
+    else
+        loop Para cada mensaje en SQS
+            Lambda -> Lambda: Personaliza plantilla con contenido
+            Lambda -> EmailSNS: Publica email formateado
+            EmailSNS -> Lambda: Confirmación de publicación
+            
+            Lambda -> SQS: Elimina mensaje procesado de la cola
+            SQS -> Lambda: Confirmación de eliminación
+            
+            Lambda -> AuditQueue: Guarda evento de auditoría
+            AuditQueue -> Lambda: Confirmación de auditoría
+        end
+    end
+end
+@enduml

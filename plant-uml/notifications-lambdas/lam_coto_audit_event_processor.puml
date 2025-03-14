@@ -1,0 +1,23 @@
+@startuml
+autonumber
+
+participant AWS_Lambda
+participant "SQS Queue" as SQS
+participant "Lambda Function" as Lambda
+participant "DynamoDB Table" as DynamoDB
+
+AWS_Lambda -> SQS: Mensajes en la cola SQS
+SQS -> Lambda: Dispara el evento con mensajes
+
+Lambda -> Lambda: Extrae los mensajes del evento
+Lambda -> Lambda: Itera sobre los mensajes recibidos
+Lambda -> Lambda: Extrae transaction_id, request_body, etc.
+
+Lambda -> DynamoDB: Guarda el evento de auditoría en la tabla audit_events
+DynamoDB -> Lambda: Confirmación de almacenamiento
+
+Lambda -> SQS: Elimina el mensaje de la cola (ACK enviado)
+SQS -> Lambda: Confirmación de eliminación
+
+Lambda -> AWS_Lambda: Responde con éxito (HTTP 200)
+@enduml

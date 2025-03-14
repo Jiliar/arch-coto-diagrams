@@ -1,0 +1,51 @@
+@startuml
+autonumber
+
+participant "API Gateway" as API
+participant "Lambda Function" as Lambda
+participant "Aurora Database" as Aurora
+participant "SQS Queue (Email)" as SQS_Email
+participant "SQS Queue (SMS)" as SQS_SMS
+participant "SQS Queue (Push)" as SQS_Push
+participant "SQS Audit Queue" as SQS_Audit
+
+API -> Lambda: POST /users/{emails|sms|push}
+Lambda -> Lambda: Genera transaction_id y obtiene request_id
+Lambda -> Lambda: Valida método HTTP
+
+alt Ruta no permitida
+    Lambda -> SQS_Audit: Guarda error en auditoría
+    Lambda -> API: Retorna error 400
+else
+    Lambda -> Lambda: Extrae datos del cuerpo de la solicitud
+    loop Para cada usuario en 'to'
+        alt Notificación por email
+            Lambda -> Aurora: Consulta email del usuario
+            Aurora -> Lambda: Retorna email
+        else Notificación por SMS
+            Lambda -> Aurora: Consulta teléfono del usuario
+            Aurora -> Lambda: Retorna teléfono
+        else Notificación por Push
+            Lambda -> Aurora: Consulta device_token del usuario
+            Aurora -> Lambda: Retorna token del dispositivo
+        end
+    end
+
+    alt Si hay destinatarios válidos
+        Lambda -> Lambda: Construye mensaje de notificación
+        alt Email
+            Lambda -> SQS_Email: Envía mensaje a la cola de email
+        else SMS
+            Lambda -> SQS_SMS: Envía mensaje a la cola de SMS
+        else Push
+            Lambda -> SQS_Push: Envía mensaje a la cola de push notifications
+        end
+    else
+        Lambda -> Lambda: No hay destinatarios válidos
+    end
+
+    Lambda -> SQS_Audit: Guarda evento en auditoría
+    Lambda -> API: Retorna éxito 200 con detalles de los destinatarios procesados
+end
+
+@enduml

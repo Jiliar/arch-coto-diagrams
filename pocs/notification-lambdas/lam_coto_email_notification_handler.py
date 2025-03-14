@@ -133,8 +133,4 @@ def lambda_handler(event, context):
     logger.info(f"Lambda ejecutada. Request ID: {request_id}, Transaction ID: {transaction_id}")
 
     path = "/users/emails"
-    transaction_output = process_sqs_messages(path, transaction_id, request_id)
-
-    send_audit_event(transaction_id, path, event, transaction_output)
-
-    return transaction_output
+    return process_sqs_messages(path, transaction_id, request_id)

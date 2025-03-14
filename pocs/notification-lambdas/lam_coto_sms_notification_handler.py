@@ -105,6 +105,4 @@ def lambda_handler(event, context):
     logger.info(f"Lambda ejecutada. Request ID: {request_id}, Transaction ID: {transaction_id}")
 
     path = "/users/sms"
-    transaction_output = process_sqs_messages(path, transaction_id, request_id)
-
-    return transaction_output
+    return rocess_sqs_messages(path, transaction_id, request_id)

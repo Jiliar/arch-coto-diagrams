@@ -1,0 +1,33 @@
+@startuml
+autonumber
+
+actor "API Gateway" as API
+participant "AbstractHandler" as Handler
+participant "CognitoClient" as Cognito
+participant "VerifiedPermissionsClient" as AVP
+
+API -> Handler: handleRequest(input, context)
+Handler -> Handler: Obtener headers del request
+Handler -> Handler: Validar JWT
+Handler -> Cognito: validate(jwt)
+Cognito --> Handler: Retornar Subject (usuario autenticado)
+
+Handler -> Handler: Extraer roles y contexto del usuario
+Handler -> Handler: Evaluar autorización
+Handler -> Handler: getAction(input, context)
+alt Acción permitida sin verificación
+    Handler -> Handler: Retornar ALLOW
+else Evaluar autorización en AVP
+    Handler -> Handler: getResources(input, context, subject)
+    alt Un solo recurso
+        Handler -> AVP: isAuthorized(request)
+        AVP --> Handler: Retornar decisión (ALLOW / DENY)
+    else Múltiples recursos
+        Handler -> AVP: batchIsAuthorized(request)
+        AVP --> Handler: Retornar decisiones por recurso
+    end
+end
+
+Handler -> Handler: Construir PolicyDocument
+Handler -> API: Retornar Response (ALLOW/DENY)
+@enduml

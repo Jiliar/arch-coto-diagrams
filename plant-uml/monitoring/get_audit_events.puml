@@ -1,0 +1,23 @@
+
+@startuml
+autonumber
+
+boundary "Grafana" as User
+participant "Grafana" as Grafana
+participant "Microservicio .NET" as DotNet
+collections "MongoDB (audit_events)" as MongoDB
+
+User -> Grafana: Consulta en panel de Grafana (GET /get_audit_events)
+Grafana -> DotNet: GET /get_audit_events
+DotNet -> MongoDB: Consulta en audit_events (PK: transaction_id, SK: timestamp)
+
+alt Si hay datos
+    MongoDB --> DotNet: Retorna lista de eventos audit_events
+    DotNet --> Grafana: Retorna datos en formato JSON
+    Grafana --> User: Renderiza información en panel
+else No hay datos
+    MongoDB --> DotNet: Retorna respuesta vacía
+    DotNet --> Grafana: Respuesta sin datos
+    Grafana --> User: Muestra mensaje "No hay eventos"
+end
+@enduml

@@ -1,0 +1,39 @@
+@startuml
+title Flujo de Autorización y Transacciones HTTP en AWS con Istio, EKS y Aurora
+
+actor Client
+participant "API Gateway" as APIGW
+participant "Lambda Authorizer" as LambdaAuth
+participant "Cognito" as Cognito
+participant "Ingress Controller" as Ingress
+participant "Istio Service Mesh" as Istio
+participant "EKS Service (App)" as App
+database "Amazon Aurora" as Aurora
+
+' Inicio del flujo de autorización
+Client -> APIGW: HTTP Request (Auth Header, Path, Method)
+APIGW -> LambdaAuth: Invoke Lambda Authorizer (JWT Token, Path, Method)
+LambdaAuth -> Cognito: Validar JWT Token
+Cognito --> LambdaAuth: Token válido / inválido
+LambdaAuth -> APIGW: Genera política de autorización (ALLOW/DENY)
+
+alt Si la autorización es DENY
+    APIGW --> Client: 403 Forbidden
+else Si la autorización es ALLOW
+    APIGW -> Ingress: HTTP Request
+
+    ' Flujo de Ingreso a Kubernetes
+    Ingress -> Istio: HTTP Request (Enrutamiento y Control de Tráfico)
+    Istio -> App: HTTP Request (Validado con Istio Policy)
+
+    ' Comunicación con Amazon Aurora
+    App -> Aurora: Consulta/Escritura en base de datos
+    Aurora --> App: Respuesta de la base de datos
+
+    ' Respuesta al Cliente
+    App --> Istio: HTTP Response (Datos o Mensaje de Éxito/Error)
+    Istio --> Ingress: HTTP Response
+    Ingress --> APIGW: HTTP Response
+    APIGW --> Client: HTTP Response (Datos o Mensaje de Éxito/Error)
+end
+@enduml

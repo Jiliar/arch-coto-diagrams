@@ -1,0 +1,23 @@
+@startuml
+autonumber
+
+actor "API Gateway" as API
+participant "AbstractHandler" as Handler
+participant "CognitoClient" as Cognito
+participant "SQSClient" as SQS 
+
+API -> Handler: handleRequest(input, context)
+Handler -> Handler: Obtener headers del request
+Handler -> Cognito: validate(jwt)
+Cognito --> Handler: Retornar Subject (usuario autenticado)
+
+Handler -> Handler: Extraer datos del JWT (userId, orgId, roles, email, etc.)
+Handler -> Handler: Construir contexto de autorización
+Handler -> Handler: Mapear contexto en estructura clave-valor
+Handler -> Handler: Incluir contexto en la respuesta
+
+Handler -> SQS: send_audit_event(transaction_id, path, request_body, transaction_output, request_id)
+SQS --> Handler: Confirmación de auditoría enviada
+
+Handler -> API: Retornar Response con datos mapeados
+@enduml

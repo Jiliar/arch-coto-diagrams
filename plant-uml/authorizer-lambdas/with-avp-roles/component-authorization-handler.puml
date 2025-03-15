@@ -1,0 +1,39 @@
+@startuml
+actor API_Gateway as "API Gateway"
+participant Lambda as "ComponentAuthorizationHandler"
+participant Logger
+participant AbstractHandler
+participant VerifiedPermissions as "Verified Permissions"
+participant SQSClient as "SQS Audit"
+
+note right of Lambda
+ComponentAuthorizationHandler 
+extiende AbstractHandler
+end note
+
+API_Gateway -> Lambda : APIGatewayProxyRequestEvent
+Lambda -> Lambda : getResources(input, context)
+Lambda -> Lambda : getResource(input)
+
+Lambda -> Logger : Log "Got event in getResource"
+Lambda -> Lambda : Verifica si input contiene 'param deseado'
+alt param deseado no presente
+    Lambda -> Lambda : Retorna null
+    Lambda -> SQSClient : send_audit_event(transaction_id, path, request_body, {"error": "param no presente"}, request_id)
+    SQSClient --> Lambda : Confirmación de auditoría enviada
+else param presente
+    Lambda -> Lambda : Extrae parámetros deseados
+    Lambda -> Logger : Genera Logs de parámetros "to send:"
+end
+
+Lambda -> AbstractHandler : Retorna lista de recursos (vacía o con 1 elemento)
+
+AbstractHandler -> VerifiedPermissions : Validar autorización del recurso
+VerifiedPermissions -> AbstractHandler : Retorna decisión (ALLOW / DENY)
+AbstractHandler -> Lambda : Retorna decisión
+
+Lambda -> SQSClient : send_audit_event(transaction_id, path, request_body, {"decision": ALLOW/DENY}, request_id)
+SQSClient --> Lambda : Confirmación de auditoría enviada
+
+Lambda -> API_Gateway : Respuesta con la autorización
+@enduml

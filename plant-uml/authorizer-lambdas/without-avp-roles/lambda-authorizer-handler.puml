@@ -1,15 +1,14 @@
 @startuml
 autonumber
 
-participant "API Gateway" as API
+participant "API Gateway" as APIGateway
 participant "Authorizer Lambda" as Handler
 participant "CognitoClient" as Cognito
-participant "API Gateway" as APIGateway
 participant "Backend" as Backend 
 participant "SQSClient" as SQS
 
 
-API -> Handler: handleRequest(input, context)
+APIGateway -> Handler: handleRequest(input, context)
 Handler -> Handler: Obtener headers del request
 Handler -> Cognito: validate(jwt)
 Cognito --> Handler: Retornar Subject (usuario autenticado)
@@ -24,5 +23,5 @@ APIGateway -> Backend: Enviar datos como Headers a Backend + Request Body
 Handler -> SQS: send_audit_event(transaction_id, path, request_body, transaction_output, request_id)
 SQS --> Handler: Confirmación de auditoría enviada
 
-Handler -> API: Retornar Response con datos mapeados
+Handler -> APIGateway: Retornar Response con datos mapeados
 @enduml

@@ -1,0 +1,119 @@
+@startuml
+title Flujo de procesamiento de mensajes SQS en lambda-superapp-alta-user
+
+actor "MSOnBoarding" as MS
+participant "SQS: sqs_coto_superapp_alta_usuarios" as SQS
+participant "Lambda: lambda-superapp-alta-user" as Lambda
+database "DB: control_messages" as DB
+participant "API: MSUser" as MSUser
+participant "Servicio Comunidad Coto" as Comunidad
+participant "Servicio Cognito" as Cognito
+
+== Envío de mensajes ==
+MS -> SQS : Enviar mensaje tipo daxia
+note right of SQS
+Daxia mensaje:
+{
+  "meta": {
+    "type": "daxia",
+    "user_id": "string"
+  },
+  "data": {
+    "username": "string",
+    ...
+  }
+}
+end note
+
+MS -> SQS : Enviar mensaje tipo cognito
+note right of SQS
+Cognito mensaje:
+{
+  "meta": {
+    "type": "cognito",
+    "user_id": "string"
+  },
+  "data": {
+    "user_name": "string"
+  }
+}
+end note
+
+MS -> SQS : Enviar mensaje tipo coto_community
+note right of SQS
+Comunidad Coto mensaje:
+{
+  "meta": {
+    "type": "coto_community",
+    "user_id": "string"
+  },
+  "data": {
+    "por definir": "string"
+  }
+}
+end note
+
+== Trigger por PutItem (evento SQS) ==
+SQS -> Lambda : Trigger PutItem
+
+== Evaluación y procesamiento de cada mensaje encolado ==
+loop por cada mensaje
+    alt mensaje tipo "daxia"
+        Lambda -> DB : ¿Existe user_id?
+        alt no existe
+            Lambda -> MSUser : Verificar si el usuario existe
+            alt no existe
+               Lambda -> MSUser : POST /crear-usuario (data)
+            else usuario existe
+               Lambda -> Lambda : Registrar log tecnico
+               Lambda -> SQS : Acknowledge mensaje
+            alt respuesta 200 OK
+                Lambda -> DB : INSERT INTO control_messages\n(user_id, daxia_receipt_date)
+                Lambda -> SQS : Acknowledge mensaje
+            else falla API
+                Lambda -> SQS : No acknowledge (mensaje permanece en cola)
+            end
+        else ya existe
+            Lambda -> Lambda : Log técnico\n"usuario ya existe - user_id, transaction_id"
+        end
+
+    else mensaje tipo "coto_community"
+        Lambda -> DB : ¿Existe user_id?
+        alt no existe
+            Lambda -> SQS : No acknowledge (mensaje permanece en cola)
+        else existe
+            Lambda -> DB : ¿daxia_receipt_date existe?
+            alt sí y coto_community_receipt_date es NULL
+                Lambda -> Comunidad : POST /crear-usuario-comunidad (data)
+                alt éxito
+                    Lambda -> DB : UPDATE control_messages\nSET coto_community_receipt_date
+                    Lambda -> SQS : Acknowledge mensaje
+                else falla
+                    Lambda -> SQS : No acknowledge (mensaje permanece en cola)
+                end
+            else ya existe coto_community_receipt_date
+                Lambda -> Lambda : Log técnico\n"usuario comunidad ya existe - user_id, transaction_id"
+            end
+        end
+
+    else mensaje tipo "cognito"
+        Lambda -> DB : ¿Existe user_id?
+        alt no existe
+            Lambda -> SQS : No acknowledge (mensaje permanece en cola)
+        else existe
+            Lambda -> DB : ¿daxia_receipt_date existe?
+            alt sí y cognito_receipt_date es NULL
+                Lambda -> Cognito : POST /set-isCreated TRUE (data)
+                alt éxito
+                    Lambda -> DB : UPDATE control_messages\nSET cognito_receipt_date
+                    Lambda -> SQS : Acknowledge mensaje
+                else falla
+                    Lambda -> SQS : No acknowledge (mensaje permanece en cola)
+                end
+            else ya existe cognito_receipt_date
+                Lambda -> Lambda : Log técnico\n"usuario cognito ya creado - user_id, transaction_id"
+            end
+        end
+    end
+end
+@enduml

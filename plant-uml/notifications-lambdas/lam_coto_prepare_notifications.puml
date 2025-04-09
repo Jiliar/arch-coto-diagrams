@@ -23,9 +23,22 @@ else
     Lambda -> Lambda: Extrae datos del cuerpo de la solicitud
     loop Para cada usuario en 'to'
         alt Notificación por email
+            Lambda -> Lambda: Verifica si el usuario tiene un OTP activo basado en X-User-Id
+            alt ¿OTP esta activo?
+                Lambda -> Lambda: Inactiva OTP antiguo / Genera nuevo OTP
+            else
+                Lambda -> Lambda: Genera nuevo OTP
+            end
             Lambda -> Aurora: Consulta email del usuario
             Aurora -> Lambda: Retorna email
+
         else Notificación por SMS
+            Lambda -> Lambda: Verifica si el usuario tiene un OTP activo basado en X-User-Id
+            alt ¿OTP esta activo?
+                Lambda -> Lambda: Inactiva OTP antiguo / Genera nuevo OTP
+            else
+                Lambda -> Lambda: Genera nuevo OTP
+            end
             Lambda -> Aurora: Consulta teléfono del usuario
             Aurora -> Lambda: Retorna teléfono
         else Notificación por Push

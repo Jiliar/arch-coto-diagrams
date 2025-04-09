@@ -1,0 +1,86 @@
+@startuml
+start
+
+:MSOnBoarding crea mensajes;
+note right
+Mensajes JSON enviados a sqs_coto_superapp_alta_usuarios:
+1. Daxia
+2. Cognito
+3. Comunidad Coto
+end note
+
+:Trigger de la Lambda por PutItem en SQS;
+:Lambda lee TODOS los mensajes en cola;
+
+repeat
+    :Evaluar siguiente mensaje;
+    switch (meta.type del mensaje)
+        case (daxia)
+            if (user_id NO existe en control_messages) then (sí)
+                :POST a MSUser con data del mensaje;
+                if (Respuesta HTTP 200) then (sí)
+                    :Insertar en control_messages con daxia_receipt_date;
+                    :Acknowledge mensaje;
+                else (no)
+                    :No guardar en DB;
+                    :Mensaje permanece en la cola;
+                endif
+            else (user_id existe)
+                :Crear log técnico;
+                note right
+                Se recibió mensaje de usuario existente.
+                Se registra user_id y transaction_id
+                end note
+                :Acknowledge mensaje;
+            endif
+        case (coto_community)
+            if (user_id existe en control_messages) then (sí)
+                if (daxia_receipt_date existe Y coto_community_receipt_date es NULL) then (sí)
+                    :POST a Comunidad Coto con data del mensaje;
+                    if (Respuesta exitosa) then (sí)
+                        :Actualizar coto_community_receipt_date en control_messages;
+                        :Acknowledge mensaje;
+                    else (no)
+                        :No guardar en DB;
+                        :Mensaje permanece en cola;
+                    endif
+                else (no)
+                    :Crear log técnico;
+                    note right
+                    Se intentó crear usuario Comunidad Coto ya existente.
+                    user_id + transaction_id
+                    end note
+                    :Acknowledge mensaje;
+                endif
+            else (no existe)
+                :No hacer nada;
+                :Mensaje permanece en cola;
+            endif
+        case (cognito)
+            if (user_id existe en control_messages) then (sí)
+                if (daxia_receipt_date existe Y cognito_receipt_date es NULL) then (sí)
+                    :Set isCreated=TRUE usando API con data del mensaje;
+                    if (Respuesta exitosa) then (sí)
+                        :Actualizar cognito_receipt_date en control_messages;
+                        :Acknowledge mensaje;
+                    else (no)
+                        :No guardar en DB;
+                        :Mensaje permanece en cola;
+                    endif
+                else (no)
+                    :Crear log técnico;
+                    note right
+                    Se intentó marcar isCreated en usuario ya existente.
+                    user_id + transaction_id
+                    end note
+                    :Acknowledge mensaje;
+                endif
+            else (no existe)
+                :No hacer nada;
+                :Mensaje permanece en cola;
+            endif
+    endswitch
+repeat while (quedan mensajes en la cola?)
+
+stop
+@enduml

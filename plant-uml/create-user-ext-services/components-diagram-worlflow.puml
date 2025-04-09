@@ -1,0 +1,61 @@
+@startuml
+skinparam componentStyle rectangle
+title Diagrama de Componentes - Proceso de Alta de Usuario
+
+package "Microservicio" {
+  [MSOnBoarding] <<Microservicio>>
+}
+
+package "Cola SQS" {
+  [sqs_coto_superapp_alta_usuarios] <<Queue>>
+}
+
+package "Lambda y procesamiento" {
+  [lambda-superapp-alta-user] <<Lambda>>
+  [control_messages (DynamoDB)] <<Database>>
+  [MSUser API] <<REST API>>
+  [Coto Comunidad API] <<REST API>>
+  [Cognito Service API] <<REST API>>
+}
+
+MSOnBoarding --> [sqs_coto_superapp_alta_usuarios] : Encola mensajes\n(Daxia, Cognito, Comunidad)
+
+[sqs_coto_superapp_alta_usuarios] --> [lambda-superapp-alta-user] : *Trigger (PutItem)*
+[lambda-superapp-alta-user] --> [sqs_coto_superapp_alta_usuarios] : Lee todos los mensajes
+
+[lambda-superapp-alta-user] --> [control_messages (DynamoDB)] : Consulta / Inserta
+[lambda-superapp-alta-user] --> [MSUser API] : POST /createUser
+[lambda-superapp-alta-user] --> [Coto Comunidad API] : POST /registerUser
+[lambda-superapp-alta-user] --> [Cognito Service API] : POST /setIsCreated
+
+note right of [sqs_coto_superapp_alta_usuarios]
+Mensajes desde MSOnBoarding:
+
+Daxia:
+{
+  "meta": {"type": "daxia", "user_id": "..."},
+  "data": {"username": "...", ...}
+}
+
+Cognito:
+{
+  "meta": {"type": "cognito", "user_id": "..."},
+  "data": {"user_name": "..."}
+}
+
+Coto Comunidad:
+{
+  "meta": {"type": "coto_community", "user_id": "..."},
+  "data": {"por definir": "..."}
+}
+end note
+
+note bottom of [lambda-superapp-alta-user]
+Lógica principal:
+1. Evalúa tipo de mensaje y existencia en DB
+2. Si es Daxia y nuevo, crea usuario via API
+3. Si es Cognito o Coto, depende de Daxia
+4. Registra fechas, hace logs y ack según lógica
+end note
+
+@enduml

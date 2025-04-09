@@ -3,20 +3,20 @@ autonumber
 
 participant "API Gateway" as API
 participant "Lambda Function" as Lambda
-participant "Aurora Database" as Aurora
+participant "Database" as Aurora
 participant "SQS Audit Queue" as SQS_Audit
 
 API -> Lambda: POST /otp/verify (headers, body)
 Lambda -> Lambda: Genera request_id y obtiene path
 
-alt Falta X-UserId o X-UserName
+alt Falta X-UserId
     Lambda -> API: Retorna 400 (MISSING_HEADERS)
 else Falta OTP o transaction_type
     Lambda -> API: Retorna 400 (MISSING_FIELDS)
 else
-    Lambda -> Aurora: Consulta OTP en la base de datos
+    Lambda -> Aurora: Consulta OTP (por otp, transaction_type, usuario y estado activo) en la BD
     Aurora -> Lambda: Retorna resultado de consulta
-
+    Lambda -> Lambda: Validar la vigencia del ultimo OTP enviado por usuario [Current Date - Sent Date <= 24hrs]
     alt OTP válido
         Lambda -> Aurora: Marca OTP como usado
         Aurora -> Lambda: Confirmación de actualización

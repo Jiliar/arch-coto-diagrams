@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e" pages="2">
     <diagram name="High Level Architecture" id="Hjs4OhvDHrLeVhwzSJXi">
-        <mxGraphModel dx="1534" dy="802" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1460" math="0" shadow="0">
+        <mxGraphModel dx="1195" dy="779" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1460" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -174,7 +174,7 @@
                 <mxCell id="WJ9-S7BZsWY1RgmfyzGn-105" value="Security&lt;br&gt;Group" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.organizations;" parent="1" vertex="1">
                     <mxGeometry x="826" y="332" width="36" height="36" as="geometry"/>
                 </mxCell>
-                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-106" value="MS Security" style="shape=ellipse;fillColor=#fa6800;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#C73500;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-106" value="MS Security" style="shape=ellipse;fillColor=#00994D;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#C73500;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="719" y="496" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="WJ9-S7BZsWY1RgmfyzGn-107" value="" style="fillColor=#ffffff;strokeColor=none;dashed=0;outlineConnect=0;html=1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;part=1;movable=0;resizable=0;rotatable=0;shape=mxgraph.ibm_cloud.microservices--1" parent="WJ9-S7BZsWY1RgmfyzGn-106" vertex="1">
@@ -182,7 +182,7 @@
                         <mxPoint x="12" y="12" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-111" value="MS Campaign" style="shape=ellipse;fillColor=#6a00ff;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-111" value="MS Campaign" style="shape=ellipse;fillColor=#00994D;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="823" y="493" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="WJ9-S7BZsWY1RgmfyzGn-112" value="" style="fillColor=#ffffff;strokeColor=none;dashed=0;outlineConnect=0;html=1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;part=1;movable=0;resizable=0;rotatable=0;shape=mxgraph.ibm_cloud.microservices--1" parent="WJ9-S7BZsWY1RgmfyzGn-111" vertex="1">
@@ -190,7 +190,7 @@
                         <mxPoint x="12" y="12" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-113" value="MS QR" style="shape=ellipse;fillColor=#6a00ff;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-113" value="MS QR" style="shape=ellipse;fillColor=#00994D;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="924" y="493" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="WJ9-S7BZsWY1RgmfyzGn-114" value="" style="fillColor=#ffffff;strokeColor=none;dashed=0;outlineConnect=0;html=1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;part=1;movable=0;resizable=0;rotatable=0;shape=mxgraph.ibm_cloud.microservices--1" parent="WJ9-S7BZsWY1RgmfyzGn-113" vertex="1">
@@ -198,7 +198,7 @@
                         <mxPoint x="12" y="12" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-115" value="MS Notification" style="shape=ellipse;fillColor=#fa6800;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#C73500;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-115" value="MS Notification" style="shape=ellipse;fillColor=#00994D;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#C73500;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="717" y="578.5" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="WJ9-S7BZsWY1RgmfyzGn-116" value="" style="fillColor=#ffffff;strokeColor=none;dashed=0;outlineConnect=0;html=1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;part=1;movable=0;resizable=0;rotatable=0;shape=mxgraph.ibm_cloud.microservices--1" parent="WJ9-S7BZsWY1RgmfyzGn-115" vertex="1">
@@ -212,7 +212,7 @@
                         <mxPoint x="864" y="604" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-119" value="MS Config" style="shape=ellipse;fillColor=#6a00ff;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-119" value="MS Config" style="shape=ellipse;fillColor=#FF8000;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="824" y="576" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="WJ9-S7BZsWY1RgmfyzGn-120" value="" style="fillColor=#ffffff;strokeColor=none;dashed=0;outlineConnect=0;html=1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;part=1;movable=0;resizable=0;rotatable=0;shape=mxgraph.ibm_cloud.microservices--1" parent="WJ9-S7BZsWY1RgmfyzGn-119" vertex="1">
@@ -220,7 +220,7 @@
                         <mxPoint x="12" y="12" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-121" value="MS Activity" style="shape=ellipse;fillColor=#6a00ff;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="WJ9-S7BZsWY1RgmfyzGn-121" value="MS Activity" style="shape=ellipse;fillColor=#00994D;aspect=fixed;resizable=0;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeColor=#3700CC;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="922" y="576" width="48" height="48" as="geometry"/>
                 </mxCell>
                 <mxCell id="WJ9-S7BZsWY1RgmfyzGn-122" value="" style="fillColor=#ffffff;strokeColor=none;dashed=0;outlineConnect=0;html=1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;part=1;movable=0;resizable=0;rotatable=0;shape=mxgraph.ibm_cloud.microservices--1" parent="WJ9-S7BZsWY1RgmfyzGn-121" vertex="1">
